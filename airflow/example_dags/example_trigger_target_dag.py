@@ -43,7 +43,7 @@ def run_this_func(**context):
     :param context: The execution context
     :type context: dict
     """
-    print("Remotely received value of {} for key=message".format(context["dag_run"].conf["message"]))
+    print(f"Remotely received value of {context['dag_run'].conf['message']} for key=message")
 
 
 run_this = PythonOperator(task_id="run_this", python_callable=run_this_func, dag=dag)
