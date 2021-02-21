@@ -220,9 +220,7 @@ class TestHiveCliHook(unittest.TestCase):
         hook = MockHiveCliHook()
         hook.load_file(filepath=filepath, table=table, create=False)
 
-        query = "LOAD DATA LOCAL INPATH '{filepath}' OVERWRITE INTO TABLE {table} ;\n".format(
-            filepath=filepath, table=table
-        )
+        query = f"LOAD DATA LOCAL INPATH '{filepath}' OVERWRITE INTO TABLE {table} ;\n"
         calls = [mock.call(query)]
         mock_run_cli.assert_has_calls(calls, any_order=True)
 
@@ -466,6 +464,7 @@ class TestHiveMetastoreHook(TestHiveEnvironment):
         self.hook.metastore.__enter__().get_tables.assert_called_with(
             db_name='airflow', pattern='static_babynames_partitioned*'
         )
+        # pylint: disable=no-member
         self.hook.metastore.__enter__().get_table_objects_by_name.assert_called_with(
             'airflow', ['static_babynames_partitioned']
         )
