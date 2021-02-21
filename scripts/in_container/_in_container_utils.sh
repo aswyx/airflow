@@ -402,6 +402,45 @@ function install_all_providers_from_pypi_with_eager_upgrade() {
 
 }
 
+function install_local_airflow_with_eager_upgrade() {
+    local extras
+    extras="${1}"
+    # we add eager requirements to make sure to take into account limitations that will allow us to
+    # install all providers
+    # shellcheck disable=SC2086
+    pip install -e ".${extras}" ${EAGER_UPGRADE_ADDITIONAL_REQUIREMENTS} \
+        --upgrade --upgrade-strategy eager
+}
+
+
+function install_all_providers_from_pypi_with_eager_upgrade() {
+    ALL_PROVIDERS_PACKAGES=$(python -c 'import setup; print(setup.get_all_provider_packages())')
+    local packages_to_install=()
+    local provider_package
+    local res
+    for provider_package in ${ALL_PROVIDERS_PACKAGES}
+    do
+        echo -n "Checking if ${provider_package} is available in PyPI: "
+        res=$(curl --head -s -o /dev/null -w "%{http_code}" "https://pypi.org/project/${provider_package}/")
+        if [[ ${res} == "200" ]]; then
+            packages_to_install+=( "${provider_package}" )
+            echo "${COLOR_GREEN}OK${COLOR_RESET}"
+        else
+            echo "${COLOR_YELLOW}Skipped${COLOR_RESET}"
+        fi
+    done
+    echo "Installing provider packages: ${packages_to_install[*]}"
+    # we add eager requirements to make sure to take into account limitations that will allow us to
+    # install all providers. We install only those packages that are available in PyPI - we might
+    # Have some new providers in the works and they might not yet be simply available in PyPI
+    # Installing it with Airflow makes sure that the version of package that matches current
+    # Airflow requirements will be used.
+    # shellcheck disable=SC2086
+    pip install -e . "${packages_to_install[@]}" ${EAGER_UPGRADE_ADDITIONAL_REQUIREMENTS} \
+        --upgrade --upgrade-strategy eager
+
+}
+
 function install_all_provider_packages_from_wheels() {
     echo
     echo "Installing all provider packages from wheels"
