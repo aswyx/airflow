@@ -46,19 +46,15 @@ class TestS3ToSnowflakeTransfer(unittest.TestCase):
         files = str(s3_keys)
         files = files.replace('[', '(')
         files = files.replace(']', ')')
-        base_sql = """
+        base_sql = f"""
                 FROM @{stage}/
                 files={files}
                 file_format={file_format}
-            """.format(
-            stage=stage, files=files, file_format=file_format
-        )
+            """
 
-        copy_query = """
+        copy_query = f"""
                 COPY INTO {schema}.{table} {base_sql}
-            """.format(
-            schema=schema, table=table, base_sql=base_sql
-        )
+            """
 
         assert mock_run.call_count == 1
         assert_equal_ignore_multiple_spaces(self, mock_run.call_args[0][0], copy_query)
@@ -86,13 +82,11 @@ class TestS3ToSnowflakeTransfer(unittest.TestCase):
         files = str(s3_keys)
         files = files.replace('[', '(')
         files = files.replace(']', ')')
-        base_sql = """
+        base_sql = f"""
                 FROM @{stage}/
                 files={files}
                 file_format={file_format}
-            """.format(
-            stage=stage, files=files, file_format=file_format
-        )
+            """
 
         copy_query = """
                 COPY INTO {schema}.{table}({columns}) {base_sql}
